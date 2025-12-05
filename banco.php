@@ -1,132 +1,143 @@
-<?php
+<?php 
 
-    const   CHEQUE_ESPECIAL = 500;
+const CHEQUE_ESPECIAL = 500;
+$clientes = [];
 
-    $clientes = [];
+function cadastrarCliente(&$clientes): bool {
 
-    function cadastrarClientes(&$clientes): bool {
+    $nome = readline('Informe seu nome: ');
+    $cpf  = readline('Informe seu CPF: ');
 
-        $nome = readline ('informe seu nome: ');
+    //validar cliente
+    if (isset($clientes[$cpf])) {
+        print('Esse CPF já possui cadastro.\n');
+        return false;
+    }
 
-        $cpf = readline ('Informe seu CPF: ');
+    $clientes[$cpf] = [
+        'nome' => $nome, 
+        'cpf' => $cpf,
+        'contas' => []
+    ];
+ if ($cpf ) {
+        # code...
+    }
 
-        if (isset($clientes[$cpf])) {
-            print ("Este usuario já possui cadastro \n");
-            return false; 
-        }
+    return true;
+}
 
-        $clientes[$cpf] = [
-            'nome' => $nome,
-            'CPF' => $cpf,
-            'contas' => []
+function cadastrarConta(array &$clientes): bool {
 
-        ];
-        return true;
-    
+    $cpf = readline("Informe seu CPF:");
+
+    if (!isset($clientes[$cpf])) {
+        print "Cliente não possui cadastro \n";
+        return false;
+    }
+
+    $numConta = rand(10000, 100000);
+
+    $clientes[$cpf]['contas'][$numConta] = [
+        'saldo' => 0,
+        'cheque_especial' => CHEQUE_ESPECIAL,
+        'extrato' => []
+    ];
+
+    print "Conta criada com sucesso\n";
+    print "O número da sua conta é: #{$numConta}";
+    return true;
 
 }
 
+function depositar(array &$clientes){
+    $cpf = readline("Informe seu CPF novamente: ");
 
+    $numConta = readline("Informe o número da conta:");
 
-    function cadastrarConta(array &$clientes): bool{
+    $valorDeposito = (float) readline("Informe o valor do depósito: ");
 
-        $cpf = readline("Informe seu CPF: ");
-
-        if (!isset($clientes[$cpf])){
-            print "Cliente não possui cadastro \n";
-            return false;
-        }
-
-        $numConta = uniqid();
-
-        $clientes[$cpf]['contas'][$numConta]= [
-            'saldo' => 0,
-            'cheque_especial' => CHEQUE_ESPECIAL,
-            'extrato' => []
-        ];
-        print "Conta criada com sucesso \n";
-        return true;
-
+    if ($valorDeposito <= 0) {
+        print "Valor de depósito inválido\n";
+        return false;
     }
+
+    $clientes[$cpf]['contas'][$numConta]['saldo'] += $valorDeposito;
+
+    $dataHora = date('d/m/Y H:i');
+    $clientes[$cpf]['contas'][$numConta]['extrato'][] = "Depósito de R$ $valorDeposito em $dataHora";
+
+
+    print "Depósito realizado com sucesso\n";
+    return true;
+}
+
+function sacar(&$clientes){
+
+    $cpf = readline("informe seu CPF:");
+
+    //validacao do CPF
+    if (!isset($clientes[$cpf])) {
+        print "Cliente não possui cadastro \n";
+        return false;
+    }
+    $conta = readline("informe o número da conta: ");
+    $valorSaque = readline("Informe o valor do saque:");
+
+    if ($clientes[$cpf]['contas'][$conta]['saldo'] >= $valorSaque) {
+        $clientes[$cpf]['contas'][$conta]['saldo'] -= $valorSaque;
+    }else{
+        print "Não foi possível sacar";
+        return false;
+    }
+
     
 
-    function depositar(&$clientes){
-        $cpf = readline("Informe seu CPF: ");
 
-        $numConta = readline("Informe o número da conta: ");
+}
 
-        $valorDeposito = (float) readline("Informe o valor do depósito: ");
+// MENU PRINCIPAL
+function menu(){
+    print "\n====== MEU BANCO EM PHP ======\n";
+    print "1 -    cadastrar cliente      |\n";
+    print "2 -    cadastrar conta        |\n";
+    print "3 -    depositar              |\n";
+    print "4 -    sacar                  |\n";
+    print "5 -    consultar saldo        |\n";
+    print "6 -    consultar extrato      |\n";
+    print "7 -    sair                   |\n";
+    print "===============================\n";
+    print "Escolha uma opção:";
+}
 
-        if ($valorDeposito <= 0) {
-            print "Valor de depósito inválido\n";
-            return false;
 
-        }
+//PROGRAMA PRINCIPAL
+while(true){
 
-        $clientes[$cpf]['contas'][$numConta]['saldo'] += $valorDeposito;
+    menu();
 
-        $dataHora = date('d/m/Y H:i');
-        $clientes[$cpf]['contas'][$numConta]['extrato'][] = "Depósito de R$ $valorDeposito em $dataHora";
+    $opcao = readline();
 
-
-        print "Depósito realizado com sucesso\n";
-        return true;
-
+    switch ($opcao) {
+        case '1':
+            cadastrarCliente($clientes);
+            break;
+        case '2':
+            cadastrarConta($clientes);
+            break;
+        case '3':
+            depositar($clientes);
+            break;
+        
+        case '4':
+            sacar($clientes);
+            break;
+        
+        case '7':
+            print "Obrigado por usar nosso banco";
+            die();
+        
+        default:
+            print "Opção inválida";
+            break;
     }
-
-    function lobby(){
-    print "===========================\n";
-    print "       MENU DO BANCO       \n";
-    print "===========================\n";
-    print "[1] cadastrar cliente      \n";
-    print "[2] cadastrar conta        \n";
-    print "[3] depositar              \n";
-    print "[4] sacar                  \n";
-    print "[5] consultar saldo        \n";
-    print "[6] consultar extrato      \n";
-    print "[7] sair                   \n";
-    print "===========================\n";
-
-    print "Escolha uma opção: \n";
-    }
-
-    while(true){
-
-        lobby();
-
-
-        $opcao = readline();
-
-        switch ($opcao) {
-            case '1':
-                cadastrarClientes($clientes);
-                break;
-
-            case '2':
-                cadastrarConta($clientes);
-                break;
-
-            case '3':
-                depositar($clientes);
-                break;
-
-            case '7':
-                print "Obrigado por usar nosso banco";
-                die();
-            
-            default:
-                print "Opção inválida";
-                break;
-        }
-
-    }
-
-
-    cadastrarClientes($clientes);
-    print_r($clientes);
-
-    cadastrarConta($clientes);
-    print_r($clientes);
-
-    depositar($clientes);
-    print_r($clientes);
+}
