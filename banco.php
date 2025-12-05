@@ -38,6 +38,7 @@ function cadastrarConta(array &$clientes): bool {
     $numConta = rand(10000, 100000);
 
     $clientes[$cpf]['contas'][$numConta] = [
+        'conta' => $numConta,
         'saldo' => 0,
         'cheque_especial' => CHEQUE_ESPECIAL,
         'extrato' => []
@@ -63,8 +64,7 @@ function depositar(array &$clientes){
 
     $clientes[$cpf]['contas'][$numConta]['saldo'] += $valorDeposito;
 
-    $dataHora = date('d/m/Y H:i');
-    $clientes[$cpf]['contas'][$numConta]['extrato'][] = "Depósito de R$ $valorDeposito em $dataHora";
+    adicionarAoExtrato($cpf, $numConta, "Deposito de $valorDeposito realizado.");
 
 
     print "Depósito realizado com sucesso\n";
@@ -90,8 +90,42 @@ function sacar(&$clientes){
         return false;
     }
 
-    
+    adicionarAoExtrato($cpf, $conta, "Saque de $valorSaque realizado.");
 
+    print "Saque realizado com sucesso\n";
+    return true;
+
+}
+
+function consultarCliente($clientes){
+
+    $cpf = readline("informe seu CPF:");
+
+    //validacao do CPF
+    if (!isset($clientes[$cpf])) {
+        print "Cliente não possui cadastro \n";
+        return false;
+    }
+
+    print "nome: " . ($clientes[$cpf]['nome']);
+    print "CPF: " . ($clientes[$cpf]['cpf']);
+
+
+    foreach ($clientes[$cpf]['contas'] as $conta) {
+       print $conta['conta'] . "\n";
+       print $conta['saldo'] . "\n";
+
+       foreach ($conta['extrato'] as $item_extrato) {
+            print $item_extrato . "\n";
+       }
+    }
+
+}
+
+function adicionarAoExtrato($cpf, $numConta, $frase){
+
+    $dataHora = date('d/m/Y H:i');
+    $clientes[$cpf]['contas'][$numConta]['extrato'][] = "($dataHora) $frase";
 
 }
 
@@ -130,6 +164,11 @@ while(true){
         
         case '4':
             sacar($clientes);
+            break;
+
+        
+        case '5':
+            consultarCliente($clientes);
             break;
         
         case '7':
